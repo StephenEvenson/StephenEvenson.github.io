@@ -3,17 +3,17 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
-description: ''
-keywords:
-author: John Doe
-language: en
-timezone: ''
+title: 这里是史蒂夫🚢
+subtitle: '史蒂夫的小天地'
+description: 'Docker容器，Java编程，学习人工智能，Solr搜索引擎'
+keywords: Docker, Java, Artificial Intelligence, Solr
+author: Stephen Evenson
+language: zh-CN
+timezone: 'Asia/Shanghai'
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: https://stephenevenson.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
