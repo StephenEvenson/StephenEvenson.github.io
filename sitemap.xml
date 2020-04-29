@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://stephenevenson.github.io/categories/index.html</loc>
+    
+    <lastmod>2020-04-29T05:39:31.503Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://stephenevenson.github.io/2020/04/29/post/</loc>
     
-    <lastmod>2020-04-29T05:35:04.325Z</lastmod>
+    <lastmod>2020-04-29T05:38:26.139Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://stephenevenson.github.io/tags/index.html</loc>
+    
+    <lastmod>2020-04-29T05:37:38.139Z</lastmod>
     
   </url>
   
