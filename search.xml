@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Hello World</title>
+    <url>/2020/04/26/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>在HDFS上运行Solr</title>
+    <url>/2020/04/29/%E5%9C%A8HDFS%E4%B8%8A%E8%BF%90%E8%A1%8CSolr/</url>
+    <content><![CDATA[<h1 id="流程"><a href="#流程" class="headerlink" title="流程:"></a>流程:</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ su root</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>确保HDFS使用到的各个节点可以SSH免密访问</li>
+<li>安装配置JDK1.8</li>
+<li>安装配置Hadsoop-2.9.2</li>
+<li>安装配置Solr-8</li>
+</ol>
+<p>&nbsp;</p>
+<a id="more"></a>
+<h1 id="SSH免密访问"><a href="#SSH免密访问" class="headerlink" title="SSH免密访问"></a>SSH免密访问</h1><p>如果想要免密访问本地，即<code>ssh localhost</code>：</p>
+<ol>
+<li><p>先查看一下是否已有公钥和密钥</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cd ~</span><br><span class="line"># ls .&#x2F;.ssh&#x2F;</span><br><span class="line">authorized_keys	 id_rsa		id_rsa.pub	known_host</span><br></pre></td></tr></table></figure>
+
+<p>如果已经存在<code>id_rsa</code>和<code>id_rsa.pub</code>， 则跳过步骤2</p>
+</li>
+<li><p>如果公钥和密钥不存在</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># ssh-keygen -t rsa</span><br><span class="line"># cat .&#x2F;.ssh&#x2F;id_rsa.pub &gt;&gt; .&#x2F;.ssh&#x2F;!</span><br></pre></td></tr></table></figure>
+
+<p>[image-20190902162637293](/Users/zhangruntian/Library/Application Support/typora-user-images/image-20190902162637293.png)</p>
+<p>添加完公钥后，测试一下是否成功：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># ssh localhost</span><br></pre></td></tr></table></figure>
+
+<p>如果想这样显示上次登录时间，没要显示被拒绝，则表明登录成功。</p>
+<p><img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g6l9638vhbj30ti0gijty.jpg" alt="屏幕快照 2019-09-02 16.28.27"></p>
+<p>如果在云服务器上，添加公钥后仍然无法登录成功，则可能需要重置一下配置。</p>
+<p>&nbsp;</p>
+</li>
+</ol>
+<h1 id="安装配置Hadoop-2-9-2"><a href="#安装配置Hadoop-2-9-2" class="headerlink" title="安装配置Hadoop-2.9.2"></a>安装配置Hadoop-2.9.2</h1><p>之前安装过Hadoop-3.1.2和Hadoop-3.2.0，但无法让Solr-8.2.0在HDFS上正常运行，会报初始化错误。但使用Hadoop-2.9.2却并不存在这个问题。</p>
+   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cd &#x2F;usr&#x2F;local&#x2F;</span><br><span class="line"># wget http:&#x2F;&#x2F;mirror.bit.edu.cn&#x2F;apache&#x2F;hadoop&#x2F;common&#x2F;hadoop-2.9.2&#x2F;hadoop-2.9.2.tar.gz</span><br><span class="line"># tar -xvf hadoop-2.9.2.tar.gz</span><br><span class="line"># mv hadoop-2.9.2 hadoop</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置Hadoop环境变量"><a href="#设置Hadoop环境变量" class="headerlink" title="设置Hadoop环境变量"></a>设置Hadoop环境变量</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># vim &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+
+<p>在文件中添加：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> HADOOP_HOME=/usr/<span class="built_in">local</span>/hadoop </span><br><span class="line"><span class="built_in">export</span> HADOOP_MAPRED_HOME=<span class="variable">$HADOOP_HOME</span> </span><br><span class="line"><span class="built_in">export</span> HADOOP_COMMON_HOME=<span class="variable">$HADOOP_HOME</span></span><br><span class="line"><span class="built_in">export</span> HADOOP_HDFS_HOME=<span class="variable">$HADOOP_HOME</span> </span><br><span class="line"><span class="built_in">export</span> YARN_HOME=<span class="variable">$HADOOP_HOME</span> </span><br><span class="line"><span class="built_in">export</span> HADOOP_COMMON_LIB_NATIVE_DIR=<span class="variable">$HADOOP_HOME</span>/lib/native </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$HADOOP_HOME</span>/sbin:<span class="variable">$HADOOP_HOME</span>/bin </span><br><span class="line"><span class="built_in">export</span> HADOOP_INSTALL=<span class="variable">$HADOOP_HOME</span></span><br></pre></td></tr></table></figure>
+
+<p>然后按esc键和<code>:wq</code>保存退出，并使之生效：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">~# source &#x2F;etc&#x2F;profile</span><br></pre></td></tr></table></figure>
+
+<h2 id="为Hadoop添加JAVA-HOME"><a href="#为Hadoop添加JAVA-HOME" class="headerlink" title="为Hadoop添加JAVA_HOME"></a>为Hadoop添加JAVA_HOME</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cd $HADOOP_HOME&#x2F;etc&#x2F;hadoop&#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>给脚本<code>hadoop-env.sh</code>和<code>yarn-env.sh</code>添加JAVA_HOME的路径</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">export JAVA_HOME&#x3D;&#x2F;usr&#x2F;local&#x2F;jdk1.8.0_221</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置Hadoop的主要文件"><a href="#配置Hadoop的主要文件" class="headerlink" title="配置Hadoop的主要文件"></a>配置Hadoop的主要文件</h2><h3 id="core-site-xml"><a href="#core-site-xml" class="headerlink" title="core-site.xml"></a>core-site.xml</h3><p>在<code>&lt;configuration&gt;</code>和<code>&lt;/configuration&gt;</code>之间添加以下字段：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.default.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://localhost:9000<span class="tag">&lt;/<span class="name">value</span>&gt;</span>   </span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>io.file.buffer.size<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>131072<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:/home/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span>Abase for other temporary directories.<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.proxyuser.hduser.hosts<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>*<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.proxyuser.hduser.groups<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>*<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>fs.default.name</code>用于存放solr的索引，值设置为<code>localhost</code>则只允许运行在本地的Solr访问，可以改为<code>0.0.0.0</code>以允许非本地的solr访问。</p>
+<h3 id="hdfs-site-xml"><a href="#hdfs-site-xml" class="headerlink" title="hdfs-site.xml"></a>hdfs-site.xml</h3><p>在<code>&lt;configuration&gt;</code>和<code>&lt;/configuration&gt;</code>之间添加以下字段：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>3<span class="tag">&lt;/<span class="name">value</span>&gt;</span>   </span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:///home/hadoopinfra/hdfs/namenode<span class="tag">&lt;/<span class="name">value</span>&gt;</span>   </span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span>  </span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.data.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>file:///home/hadoopinfra/hdfs/datanode<span class="tag">&lt;/<span class="name">value</span>&gt;</span>   </span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.http.address<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>0.0.0.0:50070<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.webhdfs.enabled<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.permissions.enabled<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>false<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>dfs.http.address</code>即hdfs的服务地址，如果地址填成<code>localhost:50070</code>则无法远程访问。hadoop-3以后，默认端口号为9870.</p>
+<p>注意每次执行<code>hdfs namenode -format</code>之前，清除namenode和datanode下的current文件。</p>
+<h3 id="yarn-site-xml"><a href="#yarn-site-xml" class="headerlink" title="yarn-site.xml"></a>yarn-site.xml</h3><p>在<code>&lt;configuration&gt;</code>和<code>&lt;/configuration&gt;</code>之间添加以下字段：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services<span class="tag">&lt;/<span class="name">name</span>&gt;</span>     </span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>mapreduce_shuffle<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services.mapreduce.shuffle.class<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>org.apache.hadoop.mapred.ShuffleHandler<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.resourcemanager.hostname<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>0.0.0.0<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果将<code>yarn.resourcemanager.hostname</code>的值填为<code>localhost</code>，则可能导致无法远程访问hadoop的8088端口。</p>
+<h3 id="mapred-site-xml"><a href="#mapred-site-xml" class="headerlink" title="mapred-site.xml"></a>mapred-site.xml</h3><p>如果没有<code>mapred-site.xml</code>文件，则：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cp mapred-site.xml.example mapred-site.xml</span><br></pre></td></tr></table></figure>
+
+<p>在<code>&lt;configuration&gt;</code>和<code>&lt;/configuration&gt;</code>之间添加以下字段：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">cd</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行Hadoop"><a href="#运行Hadoop" class="headerlink" title="运行Hadoop"></a>运行Hadoop</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cd ~</span><br><span class="line"># hdfs namenode -format</span><br><span class="line"># start-dfs.sh</span><br><span class="line"># start-yarn.sh</span><br></pre></td></tr></table></figure>
+
+<p>运行完后可以在浏览器中打开hadoop的服务<code>http://localhost:50070</code>，和管理界面<code>http://localhost:8088</code>。</p>
+<p>如果在远程访问，这里<code>localhost</code>改为运行hadoop的服务器的IP，50070端口在hadoop-3之后改为9870。</p>
+<h1 id="安装配置Solr-8-2-0"><a href="#安装配置Solr-8-2-0" class="headerlink" title="安装配置Solr-8.2.0"></a>安装配置Solr-8.2.0</h1><h2 id="下载Solr-8-2-0"><a href="#下载Solr-8-2-0" class="headerlink" title="下载Solr-8.2.0"></a>下载Solr-8.2.0</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># cd ~ </span><br><span class="line"># wget http:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;apache&#x2F;lucene&#x2F;solr&#x2F;8.2.0&#x2F;solr-8.2.0.tgz</span><br><span class="line"># tar -xvf solr-8.2.0.tgz</span><br><span class="line"># cd solr-8.2.0</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行Solr"><a href="#运行Solr" class="headerlink" title="运行Solr"></a>运行Solr</h2><ol>
+<li><p>启动solr</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># bin&#x2F;solr start -force</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>添加core</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># bin&#x2F;solr create -c core1 -force</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改core的solrconfig.xml文件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># vim server&#x2F;solr&#x2F;core1&#x2F;conf&#x2F;solrconfig.xml</span><br></pre></td></tr></table></figure>
+
+<p>输入<code>/directoryFactory</code>回车后找到：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">directoryFactory</span> <span class="attr">name</span>=<span class="string">"DirectoryFactory"</span></span></span><br><span class="line"><span class="tag">                  <span class="attr">class</span>=<span class="string">"$&#123;solr.directoryFactory:solr.NRTCachingDirectory     Factory&#125;"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将其删除，改为：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">directoryFactory</span> <span class="attr">name</span>=<span class="string">"DirectoryFactory"</span> <span class="attr">class</span>=<span class="string">"solr.HdfsDirectoryFactory"</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">str</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.home"</span>&gt;</span>hdfs://localhost:9000</span><br><span class="line">    /solr<span class="tag">&lt;/<span class="name">str</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.enabled"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">int</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.slab.count"</span>&gt;</span>1<span class="tag">&lt;/<span class="name">int</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.direct.memory.allocation"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">int</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.blocksperbank"</span>&gt;</span>16384<span class="tag">&lt;/<span class="name">int</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.read.enabled"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.blockcache.whrite.enabled"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.nrtcachingdirectory.enable"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">int</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.nrtcachingdirectory.maxmergesizemb"</span>&gt;</span>16<span class="tag">&lt;/<span class="name">int</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">int</span> <span class="attr">name</span>=<span class="string">"solr.hdfs.nrtcachingdirectory.maxcachedmb"</span>&gt;</span>192<span class="tag">&lt;/<span class="name">int</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">directoryFactory</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果solr和hadoop运行在不同的服务器上，则将<code>solr.hdfs.home</code>中的localhost改为hadoop服务器的IP地址。</p>
+<p>输入<code>/lockType</code>回车后找到：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">lockType</span>&gt;</span>$&#123;solr.lock.type:native&#125;<span class="tag">&lt;/<span class="name">lockType</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>将其改为：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">lockType</span>&gt;</span>$&#123;solr.lock.type:hdfs&#125;<span class="tag">&lt;/<span class="name">lockType</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在HDFS中创建文件夹</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hadoop fs -mkdir &#x2F;solr</span><br><span class="line">hadoop fs -ls &#x2F;</span><br></pre></td></tr></table></figure>
+
+<p>如果看见输出<code>solr</code>的文件，表明创建成功</p>
+</li>
+<li><p>然后重新启动solr：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># bin&#x2F;solr restart -force</span><br></pre></td></tr></table></figure>
+
+<p>此时，solr会将索引放入hdfs进行管理。</p>
+<p><img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g6ldummbiuj30q408uq3u.jpg" alt="image-20190902191025477"></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>Solr</tag>
+        <tag>Hadoop</tag>
+      </tags>
+  </entry>
+</search>
