@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://stephenevenson.github.io/"/>
-  <updated>2020-05-04T09:10:58.101Z</updated>
+  <updated>2020-05-05T01:17:23.413Z</updated>
   <id>https://stephenevenson.github.io/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>在Linux上添加Portainer</title>
+    <link href="https://stephenevenson.github.io/2020/05/05/%E5%9C%A8Linux%E4%B8%8A%E6%B7%BB%E5%8A%A0Portainer/"/>
+    <id>https://stephenevenson.github.io/2020/05/05/%E5%9C%A8Linux%E4%B8%8A%E6%B7%BB%E5%8A%A0Portainer/</id>
+    <published>2020-05-05T01:07:58.000Z</published>
+    <updated>2020-05-05T01:17:23.413Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="流程："><a href="#流程：" class="headerlink" title="流程："></a>流程：</h1><ol><li>创建Portainer的数据卷</li><li>运行Portainer容器</li></ol><a id="more"></a><h1 id="操作："><a href="#操作：" class="headerlink" title="操作："></a>操作：</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker volume create portainer_data</span><br><span class="line">docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer</span><br></pre></td></tr></table></figure><p>之前折腾过Rancher，RancherOS，K3s和K3OS，用过一段时间的kubernetes集群，发现如果是自己用，Portainer已经十分强大了，而且操作简单。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;流程：&quot;&gt;&lt;a href=&quot;#流程：&quot; class=&quot;headerlink&quot; title=&quot;流程：&quot;&gt;&lt;/a&gt;流程：&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;创建Portainer的数据卷&lt;/li&gt;
+&lt;li&gt;运行Portainer容器&lt;/li&gt;
+&lt;/ol&gt;
+    
+    </summary>
+    
+    
+      <category term="Docker" scheme="https://stephenevenson.github.io/categories/Docker/"/>
+    
+    
+      <category term="Portainer" scheme="https://stephenevenson.github.io/tags/Portainer/"/>
+    
+  </entry>
   
   <entry>
     <title>在HDFS上运行Solr</title>
